@@ -13,6 +13,7 @@ Flask-SQLAlchemy==2.5.1
 Flask-WTF==0.14.3
 ForgeryPy==0.1
 greenlet==1.0.0
+gunicorn==20.1.0
 idna==3.1
 importlib-metadata==4.0.1
 itsdangerous==1.1.0
@@ -21,6 +22,8 @@ loguru==0.5.3
 Mako==1.1.4
 MarkupSafe==1.1.1
 mysql-connector==2.2.9
+psycopg2==2.8.6
+psycopg2-binary==2.8.6
 python-dateutil==2.8.1
 python-dotenv==0.17.0
 python-editor==1.0.4
