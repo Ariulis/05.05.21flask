@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SelectField, TextAreaField, SubmitField, ValidationError
 from wtforms.validators import DataRequired, Length, Email, Regexp
+from flask_ckeditor import CKEditorField
 
 from ..models import User, Role
 
@@ -39,3 +40,8 @@ class EditAdminProfileForm(FlaskForm):
     def validate_email(self, field):
         if self.user.email != field.data and User.query.filter_by(email=field.data).first():
             raise ValidationError('Email is already registered')
+
+
+class PostForm(FlaskForm):
+    body = CKEditorField('What is on your mind?', validators=[DataRequired()])
+    submit = SubmitField('Save')

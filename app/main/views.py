@@ -1,22 +1,64 @@
-from flask import render_template, redirect, url_for, flash
+from flask import render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
 
 from . import main
-from .forms import EditAdminProfileForm, EditProfileForm
+from .forms import EditAdminProfileForm, EditProfileForm, PostForm
 from .. import db
-from ..models import User, Role
+from ..models import User, Role, Post
 from ..decorators import admin_required
 
 
-@main.route('/')
+@main.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html')
+    form = PostForm()
+    if form.validate_on_submit():
+        new_post = Post(
+            body=form.body.data,
+            author=current_user._get_current_object()
+        )
+        db.session.add(new_post)
+        db.session.commit()
+        return redirect(url_for('.index'))
+
+    page = request.args.get('page', 1, type=int)
+    pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page, per_page=current_app.config['POSTS_PER_PAGE']
+    )
+    posts = pagination.items
+
+    return render_template('index.html', posts=posts, pagination=pagination, form=form)
+
+
+@main.route('/post/<int:id>')
+def post(id):
+    post = Post.query.get_or_404(id)
+    return render_template('post.html', posts=[post])
+
+
+@main.route('/edit-post/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_post(id):
+    post = Post.query.get_or_404(id)
+    form = PostForm()
+    if form.validate_on_submit():
+        post.body = form.body.data
+        db.session.add(post)
+        db.session.commit()
+        flash('The post has just been edited.', 'info')
+        return redirect(url_for('main.post', id=post.id))
+    form.body.data = post.body
+    return render_template('edit_post.html', form=form, post=post)
 
 
 @main.route('/profile/<username>')
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
-    return render_template('user.html', user=user)
+    page = request.args.get('page', 1, type=int)
+    pagination = user.posts.order_by(Post.timestamp.desc()).paginate(
+        page, per_page=current_app.config['POSTS_PER_PAGE']
+    )
+    posts = pagination.items
+    return render_template('user.html', user=user, pagination=pagination, posts=posts)
 
 
 @main.route('/edit-profile', methods=['GET', 'POST'])

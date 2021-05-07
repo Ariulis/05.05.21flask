@@ -26,3 +26,12 @@ h2,
   font-size: 0.75rem;
   color: red;
 }
+.pagination {
+  margin: 0 auto 20px;
+}
+.create-post:active, .create-post:focus {
+  background-color: #17a2b8;
+  border-color: #17a2b8;
+  outline: none;
+  box-shadow: none;
+}
