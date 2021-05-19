@@ -11,9 +11,19 @@
     <div class="row justify-content-center">
         <div class="col-6">
             {% if current_user.can(Permission.WRITE) %}
-                {{ macros.forms(form) }}
+                {{ macros.forms(form, 'form-index') }}
                 <button class="btn btn-info mb-2 create-post">Create post</button>
             {% endif %}
+            <ul class="list-unstyled d-flex index-followed {% if current_user.is_anonymous %}display-none{% endif %}">                    
+                <li {% if not show_followed %}class="active"{% endif %}>
+                    <a href="{{ url_for('.show_all') }}">All</a>
+                </li>
+                {% if current_user.is_authenticated %}
+                    <li {% if show_followed %}class="active"{% endif %}>
+                        <a href="{{ url_for('.show_followed') }}">Followed</a>
+                    </li>
+                {% endif %}
+            </ul>
             {% include '_posts.html' %}
         </div>
     </div>

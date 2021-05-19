@@ -15,18 +15,32 @@
                 <p>Real name: {{ user.name }}</p>
             {% endif %}
             {% if user.location %}
-                <p>Location: <a href="https://maps.google.com?{{ user.location }}">{{ user.location }}</a></p>
+                <p>Location: <a href="https://maps.google.com/?q={{ user.location }}">{{ user.location }}</a></p>
             {% endif %}
             {% if user.about_me %}
                 <p>About me: {{ user.about_me }}</p>
             {% endif %}
             <p>Member since: {{ user.member_since.strftime('%d.%m.%Y') }}</p>
             <p>Last seen: {{ user.last_seen.strftime('%d.%m.%Y %H:%M:%S') }}</p>
-            {% if current_user.is_administrator() %}
-                <p><a href="{{ url_for('main.edit_admin_profile', id=user.id) }}" class="badge badge-danger">Edit [admin] profile</a></p>
-            {% elif user == current_user %}
-                <p><a href="{{ url_for('main.edit_profile') }}" class="badge badge-primary">Edit profile</a></p>
-            {% endif %}
+            <p>
+                {% if current_user.can(Permission.FOLLOW) and user != current_user %}
+                    {% if not current_user.is_following(user) %}
+                        <a href="{{ url_for('.follow', username=user.username) }}" class="badge badge-warning">Follow</a>
+                    {% else %}
+                        <a href="{{ url_for('.unfollow', username=user.username) }}" class="badge badge-primary">Unfollow</a>
+                    {% endif %}
+                {% endif %}
+                <a href="{{ url_for('.followers', username=user.username) }}" class="badge badge-secondary">Followers: {{ user.followers.count() - 1 }}</a>
+                <a href="{{ url_for('.followed_by', username=user.username) }}" class="badge badge-info">Followed: {{ user.followed.count() - 1 }}</a>
+                {% if current_user.is_authenticted and user != current_user and user.is_following(current_user) %}
+                    | <span class="badge badge-light">Follows you</span>
+                {% endif %}
+                {% if current_user.is_administrator() %}
+                    <a href="{{ url_for('main.edit_admin_profile', id=user.id) }}" class="badge badge-danger">Edit [admin] profile</a>
+                {% elif user == current_user %}
+                    <a href="{{ url_for('main.edit_profile') }}" class="badge badge-primary">Edit profile</a>
+                {% endif %}
+            </p>
             {% if posts %}
                 <h2 class="mb-2">'{{ user.username }}' posts:</h2>
                 {% include '_posts.html' %}

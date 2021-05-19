@@ -10,6 +10,7 @@ const bootstrapColors = [
   "dark",
 ];
 const createPostButton = document.querySelector(".create-post");
+const formOnIndex = document.querySelector(".form-index");
 
 preloader
   .querySelector(".spinner-border")
@@ -19,18 +20,20 @@ document.addEventListener("DOMContentLoaded", function () {
   setTimeout(function () {
     preloader.style.display = "none";
   }, 600);
-
-  if (createPostButton) {
-    createPostButton.previousElementSibling.style.display = "none";
-  }
 });
 
-createPostButton.addEventListener("click", function () {
-  if (createPostButton.innerHTML === "Create post") {
-    createPostButton.previousElementSibling.style.display = "block";
-    createPostButton.innerHTML = "Cancel";
-  } else {
-    createPostButton.previousElementSibling.style.display = "none";
-    createPostButton.innerHTML = "Create post";
-  }
-});
+if (createPostButton) {
+  createPostButton.addEventListener("click", function () {
+    if (createPostButton.innerHTML === "Create post") {
+      formOnIndex.style.maxHeight = formOnIndex.scrollHeight + "px";
+      formOnIndex.style.opacity = 1;
+      formOnIndex.style.visibility = "visible";
+      createPostButton.innerHTML = "Cancel";
+    } else {
+      formOnIndex.style.maxHeight = 0;
+      formOnIndex.style.opacity = 0;
+      formOnIndex.style.visibility = "hidden";
+      createPostButton.innerHTML = "Create post";
+    }
+  });
+}

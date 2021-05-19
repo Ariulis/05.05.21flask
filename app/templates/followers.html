@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% import '_macros.html' as macros %}
+
+{% block title %}
+    {{ super() }} - {{ title }} {{ user.username }}
+{% endblock title %}
+
+{% block content %}
+    <h1>{{ title }} {{ user.username }}</h1>
+    <hr>
+    <div class="row justify-content-center">
+        <div class="col-6">
+            <table>
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Since</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for follow in follows %}
+                        {% if follow.user != user %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('.user', username=follow.user.username) }}">
+                                        <img src="{{ follow.user.gravatar(size=30) }}" alt="user avatar"> {{ follow.user.username }}
+                                    </a>
+                                </td>
+                                <td>{{ follow.timestamp.strftime('%d.%m.%Y %H:%M:%S') }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block pagination %}
+    {{ macros.pagination_widget(pagination, endpoint, username=user.username) }}
+{% endblock pagination %}

@@ -7,18 +7,16 @@
             </div>
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">{{ post.body | safe }}</li>
-                {% if not current_user.is_anonymous %}
-                    <li class="list-group-item">
-                        {% if not 'post' in request.path %}
-                            <a href="{{ url_for('main.post', id=post.id) }}" class="badge badge-primary">Permalink</a>
-                        {% endif %}
-                        {% if current_user.is_administrator() %}
-                            <a href="{{ url_for('main.edit_post', id=post.id) }}" class="badge badge-warning">Edit [admin] post</a>
-                        {% elif current_user == post.author %}
-                            <a href="{{ url_for('main.edit_post', id=post.id) }}" class="badge badge-info">Edit post</a>
-                        {% endif %}
-                    </li>
-                {% endif %}
+                <li class="list-group-item">
+                    {% if not 'post' in request.path %}
+                    <a href="{{ url_for('main.post', id=post.id) }}" class="badge badge-primary">Permalink</a>
+                    {% endif %}
+                    {% if current_user.is_administrator() %}
+                    <a href="{{ url_for('main.edit_post', id=post.id) }}" class="badge badge-warning">Edit [admin] post</a>
+                    {% elif current_user == post.author %}
+                    <a href="{{ url_for('main.edit_post', id=post.id) }}" class="badge badge-info">Edit post</a>
+                    {% endif %}
+                </li>
             </ul>
         </div>
     {% endfor %}

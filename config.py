@@ -8,6 +8,7 @@ class Config:
     WTF_CSRF_SECRET_KEY = os.environ.get('WTF_CSRF_SECRET_KEY')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    FOLLOWERS_PER_PAGE = 5
     POSTS_PER_PAGE = 5
 
     # Mail
