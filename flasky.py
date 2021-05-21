@@ -3,7 +3,7 @@ from flask_migrate import Migrate
 from dotenv import load_dotenv
 
 from app import create_app, db
-from app.models import User, Role, Post, Follow
+from app.models import User, Role, Post, Follow, Comment
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
@@ -16,7 +16,7 @@ migrate = Migrate(app, db)
 
 @app.shell_context_processor
 def make_shell_context():
-    return dict(app=app, db=db, User=User, Role=Role, Post=Post, Follow=Follow)
+    return dict(app=app, db=db, User=User, Role=Role, Post=Post, Follow=Follow, Comment=Comment)
 
 
 @app.cli.command()

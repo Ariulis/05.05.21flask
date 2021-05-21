@@ -3,9 +3,9 @@ from flask_login import login_required, current_user
 from sqlalchemy.orm import query
 
 from . import main
-from .forms import EditAdminProfileForm, EditProfileForm, PostForm
+from .forms import EditAdminProfileForm, EditProfileForm, PostForm, CommentForm
 from .. import db
-from ..models import Permission, User, Role, Post, Follow
+from ..models import Permission, User, Role, Post, Follow, Comment
 from ..decorators import admin_required, permission_required
 
 
@@ -40,10 +40,32 @@ def index():
     return render_template('index.html', posts=posts, pagination=pagination, form=form, show_followed=show_followed)
 
 
-@main.route('/post/<int:id>')
+@main.route('/post/<int:id>', methods=['GET', 'POST'])
 def post(id):
     post = Post.query.get_or_404(id)
-    return render_template('post.html', posts=[post])
+    form = CommentForm()
+    if form.validate_on_submit():
+        comment = Comment(
+            body=form.body.data,
+            post=post,
+            author=current_user._get_current_object()
+        )
+        db.session.add(comment)
+        db.session.commit()
+        flash('Your comment has been published.', 'success')
+        return redirect(url_for('.post', id=post.id, page=-1))
+
+    page = request.args.get('page', 1, type=int)
+    if page == -1:
+        page = (post.comments.count() -
+                1) // current_app.config['COMMENTS_PER_PAGE']
+
+    pagination = post.comments.order_by(Comment.timestamp.desc()).paginate(
+        page, per_page=current_app.config['COMMENTS_PER_PAGE']
+    )
+
+    comments = pagination.items
+    return render_template('post.html', posts=[post], form=form, comments=comments, pagination=pagination)
 
 
 @main.route('/edit-post/<int:id>', methods=['GET', 'POST'])
@@ -184,3 +206,37 @@ def show_followed():
     resp = make_response(redirect(url_for('.index')))
     resp.set_cookie('show_followed', '1', max_age=30*24*60*60)
     return resp
+
+
+@main.route('/moderate')
+@login_required
+@permission_required(Permission.MODERATE)
+def moderate():
+    page = request.args.get('page', 1, type=int)
+    pagination = Comment.query.order_by(Comment.timestamp.desc()).paginate(
+        page, per_page=current_app.config['COMMENTS_PER_PAGE']
+    )
+    comments = pagination.items
+    return render_template('moderate.html', pagination=pagination, comments=comments, page=page)
+
+
+@main.route('/moderate-enable/<int:id>')
+@login_required
+@permission_required(Permission.MODERATE)
+def moderate_enable(id):
+    comment = Comment.query.get_or_404(id)
+    comment.disabled = False
+    db.session.add(comment)
+    db.session.commit()
+    return redirect(url_for('.moderate', page=request.args.get('page', 1, type=int)))
+
+
+@main.route('/moderate-disable/<int:id>')
+@login_required
+@permission_required(Permission.MODERATE)
+def moderate_disable(id):
+    comment = Comment.query.get_or_404(id)
+    comment.disabled = True
+    db.session.add(comment)
+    db.session.commit()
+    return redirect(url_for('.moderate', page=request.args.get('page', 1, type=int)))

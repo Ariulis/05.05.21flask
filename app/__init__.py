@@ -8,9 +8,10 @@ from flask_wtf.csrf import CSRFProtect
 from loguru import logger
 
 from config import config
-from .admin import HomeAdminView, UserAdminView
+from .admin import HomeAdminView, UserAdminView, PostAdminView, CommentAdminView
 
-logger.add('log/debug.log', format="{time} {level} {message}", level="DEBUG", rotation='10 KB', compression='zip')
+logger.add('log/debug.log', format="{time} {level} {message}",
+           level="DEBUG", rotation='10 KB', compression='zip')
 
 db = SQLAlchemy()
 mail = Mail()
@@ -34,9 +35,11 @@ def create_app(config_name):
 
     # Admin
 
-    from .models import User
+    from .models import User, Post, Comment
+
     admin = Admin(app, 'FlaskyApp', url='/', index_view=HomeAdminView())
-    admin.add_views(UserAdminView(User, db.session))
+    admin.add_views(UserAdminView(User, db.session), PostAdminView(
+        Post, db.session), CommentAdminView(Comment, db.session))
 
     # Blueprints
 

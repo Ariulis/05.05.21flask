@@ -10,6 +10,7 @@ class Config:
 
     FOLLOWERS_PER_PAGE = 5
     POSTS_PER_PAGE = 5
+    COMMENTS_PER_PAGE = 2
 
     # Mail
 
